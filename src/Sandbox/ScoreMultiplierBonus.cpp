@@ -1,0 +1,46 @@
+#include "pch.h"
+#include "ScoreMultiplierBonus.h"
+
+void ScoreMultiplierBonus::Init()
+{
+	mBonusGeometry = new Capsule();
+	mBonusGeometry->SetPosition({ BONUS_POSITION_X, BONUS_POSITION_Y, BONUS_POSITION_Z });
+	mBonusGeometry->SetScale(BONUS_SCALE);
+	mBonusGeometry->SetRotation({ 0.f,0.f, BONUS_ROTATION_Z });
+	mBonusGeometry->SetColor(SCORE_MULTIPLIER_BONUS_COLOR);
+	SetTag(SCORE_MULTIPLIER_TAG);
+	AddGeometry(mBonusGeometry);
+
+	mCollider.mPositionCollider = mBonusGeometry->GetPosition();
+	mCollider.mRadius = COLLIDER_RADIUS;
+}
+
+void ScoreMultiplierBonus::Update(float _deltaTime)
+{
+	SetPosition(BONUS_POSITION_X, BONUS_POSITION_Y, mPosition.mZ - mSpeedMove * _deltaTime);
+	Move(mPosition.mX, mPosition.mY, mPosition.mZ);
+	mCurrentRotationY += mSpeedRotation * _deltaTime;
+	mBonusGeometry->SetRotation({ 0.f, mCurrentRotationY, BONUS_ROTATION_Z });
+	mCollider.mPositionCollider = mBonusGeometry->GetPosition();
+}
+
+void ScoreMultiplierBonus::Move(float _posX, float _posY, float _posZ)
+{
+	mBonusGeometry->SetPosition({ _posX, _posY, _posZ });
+}
+bool ScoreMultiplierBonus::IsCollideCharacter(float _characterX, float _characterY, float _characterZ)
+{
+	float distX = _characterX - mCollider.mPositionCollider.mX;
+	float distY = _characterY - mCollider.mPositionCollider.mY;
+	float distZ = _characterZ - mCollider.mPositionCollider.mZ;
+
+	float distance = std::sqrt(distX * distX + distY * distY + distZ * distZ);
+
+	if (distance < (1.f + mCollider.mRadius))
+	{
+		return true;
+	}
+
+	return false;
+}
+
